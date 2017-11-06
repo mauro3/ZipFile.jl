@@ -40,7 +40,7 @@
 # 	Julia
 # 	Julia
 #
-isdefined(Base, :__precompile__) && __precompile__()
+__precompile__()
 module ZipFile
 
 import Base: read, eof, write, close, mtime, position, show
