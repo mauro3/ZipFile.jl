@@ -117,7 +117,7 @@ function Writer(io::IO, level::Integer, raw::Bool=false)
     strm = z_stream()
     ret = ccall((:deflateInit2_, libz),
                 Int32, (Ptr{z_stream}, Cint, Cint, Cint, Cint, Cint, Ptr{UInt8}, Int32),
-                &strm, level, 8, raw? -15 : 15, 8, 0, zlib_version(), sizeof(z_stream))
+                &strm, level, 8, raw ? -15 : 15, 8, 0, zlib_version(), sizeof(z_stream))
 
     if ret != Z_OK
         error("Error initializing zlib deflate stream.")
@@ -179,13 +179,8 @@ function write{T,N,A<:Array}(w::Writer, a::SubArray{T,N,A})
         # WARNING: cartesianmap(f,dims) is deprecated, use for idx = CartesianRange(dims)
         #     f(idx.I...)
 
-        if VERSION >= v"0.4.0-"
-            for idx in CartesianRange(tuple(1, size(a)[2:end]...))
-                write(w, pointer(a, idx.I), colsz)
-            end
-        else
-            cartesianmap((idxs...)->write(w, pointer(a, idxs), colsz),
-                        tuple(1, size(a)[2:end]...))
+        for idx in CartesianRange(tuple(1, size(a)[2:end]...))
+            write(w, pointer(a, idx.I), colsz)
         end
 
         return colsz*Base.trailingsize(a,2)
@@ -246,7 +241,7 @@ function Reader(io::IO, raw::Bool=false; bufsize::Int=4096)
     strm = z_stream()
     ret = ccall((:inflateInit2_, libz),
                 Int32, (Ptr{z_stream}, Cint, Ptr{UInt8}, Int32),
-                &strm, raw? -15 : 47, zlib_version(), sizeof(z_stream))
+                &strm, raw ? -15 : 47, zlib_version(), sizeof(z_stream))
     if ret != Z_OK
         error("Error initializing zlib inflate stream.")
     end
